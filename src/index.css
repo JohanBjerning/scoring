@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #657a85;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.scoreboard {
+  font-size: 30px;
+  font-weight: 800;
+  font-variant: small-caps;
+  background-color: #194b7b;
+  color: #fff;
+}
+
+.scoreboard-inner {
+  padding: 10px;
+  margin: 10px;
+  text-align: center;
+}
+
+.scoreboard-score {
+  color: #000;
+  background-color: #fff;
+  width: 95%;
+  text-align: center;
+}

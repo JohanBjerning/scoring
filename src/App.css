@@ -1,0 +1,37 @@
+.App {
+  text-align: center;
+}
+
+.disabled-image {
+  opacity: 0.4;
+  filter: alpha(opacity=40); /* msie */
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+   -ms-filter: grayscale(100%);
+       filter: grayscale(100%); 
+}
+
+
+.App-logo {
+  width: 40vmin;
+  border: dashed 3px #fff;
+  text-align: center;
+  padding: 20px;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.scoring {
+  height: calc(100vh - 56px);
+}
