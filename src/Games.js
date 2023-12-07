@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import ListGames from './ListGames';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Analyze from './Analyze';
+import { Link } from '@mui/material';
 
 const darkTheme = createTheme({
   palette: {
@@ -53,7 +54,7 @@ function Games({user}) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  
+
   return (
     <Box>
     <ThemeProvider theme={darkTheme}>
@@ -81,6 +82,7 @@ function Games({user}) {
             <Analyze path={"history"} game={game} />
           }
         </TabPanel>
+        <br/><br/><Link href="/login">Login</Link>
     </Box>
   );
 }
