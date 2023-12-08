@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 import ListGames from './ListGames';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Analyze from './Analyze';
-import { Link } from '@mui/material';
+import BottomBarMain from './Components/BottomBarMain';
 
 const darkTheme = createTheme({
   palette: {
@@ -51,6 +51,10 @@ function Games({user}) {
   const [value, setValue] = React.useState(0);
   const [game, setGame] = React.useState();
 
+  const showAnalyze = (id, path) => {
+    setGame({id: id, path: path});
+  }
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -73,16 +77,20 @@ function Games({user}) {
       </AppBar>
       </ThemeProvider>
         <TabPanel value={value} index={0} dir={theme.direction}>
-          <ListGames user={user} path={"runningGames"} />
+        {!game ? 
+            <ListGames user={user} path={"runningGames"} setGame={showAnalyze} />
+          :
+            <Analyze path={game.path} game={game.id} />
+          }
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
           {!game ? 
-            <ListGames user={null} path={"history"} setGame={setGame} />
+            <ListGames user={null} path={"history"} setGame={showAnalyze} />
           :
-            <Analyze path={"history"} game={game} />
+            <Analyze path={game.path} game={game.id} />
           }
         </TabPanel>
-        <br/><br/><Link href="/login">Login</Link>
+        <BottomBarMain setGame={() => setGame(null)}/>
     </Box>
   );
 }

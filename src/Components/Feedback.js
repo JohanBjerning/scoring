@@ -8,7 +8,8 @@ const alternatives = [
   "Ace",
   "Block",
   "Unforced",
-  "Serve miss"
+  "Serve miss",
+  "Oklart"
 ]
 export default function Feedback({report}) {
   return (

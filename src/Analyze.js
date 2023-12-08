@@ -1,10 +1,10 @@
-import { Box, LinearProgress } from '@mui/material';
+import { Box, LinearProgress, Toolbar } from '@mui/material';
 import { onValue, ref } from 'firebase/database';
 import React, { useEffect, useState } from 'react'
 import { db } from './firebase';
 import AnalyzeTable from './Components/AnalyzeTable';
 
-function Analyze({path ,game}) {
+function Analyze({ path, game }) {
   const [score, setScore] = useState();
   useEffect(() => {
     const refDb = ref(db, `${path}/${game}`);
@@ -19,24 +19,36 @@ function Analyze({path ,game}) {
   function arrangeData(data) {
     const newData = [];
     Object.keys(data).map(key => {
-      if(!newData[data[key].feedback])
-        newData[data[key].feedback] = 0;
-      newData[data[key].feedback] += 1;      
+      newData[key] = [];
+      data[key].map(point => {
+        if (!newData[key][point.winner])
+          newData[key][point.winner] = [];
+        if (!newData[key][point.winner][point.feedback])
+          newData[key][point.winner][point.feedback] = 0;
+        newData[key][point.winner][point.feedback] += 1;
+        return "";
+      })
       return "";
     })
     return newData;
   }
- 
-  if(!score)
+
+  if (!score)
     return <LinearProgress />
 
-  const away = arrangeData(score.away.analyze);
-  const home = arrangeData(score.home.analyze);
+  const arragened = score.analyze ? arrangeData(score.analyze) : null;
 
   return (
     <Box>
-      <AnalyzeTable team={score.home.name} data={home} />
-      <AnalyzeTable team={score.away.name} data={away} />
+      {!arragened ?
+        <div>No data</div>
+        :
+        <>
+          <AnalyzeTable name={score.home.name} team={"home"} data={arragened} />
+          <AnalyzeTable name={score.away.name} team={"away"} data={arragened} />
+          <Toolbar />
+        </>
+      }
     </Box>
   )
 }

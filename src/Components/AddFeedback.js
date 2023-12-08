@@ -8,7 +8,7 @@ export default function AddFeedback({open, handleClose}) {
   return (
     <div>
       <Dialog 
-        onClose={handleClose} 
+        onClose={() => handleClose(null)} 
         open={open}>
         <DialogTitle>Hur vanns bollen?</DialogTitle>
         <Feedback report={handleClose} />

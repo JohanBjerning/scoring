@@ -1,4 +1,4 @@
-import { Grid, Button, LinearProgress, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Grid, Button, LinearProgress, ToggleButtonGroup, ToggleButton, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { increment, onValue, remove, set } from 'firebase/database';
 import { db, ref } from './firebase';
@@ -11,6 +11,10 @@ import {
   getContrastRatio,
 } from '@mui/material/styles';
 import BottomBar from './Components/BottomBar';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const homeBase = '#303f9f';
 const homeMain = alpha(homeBase, 0.7);
@@ -58,7 +62,11 @@ const setServer = (newServer, matchId) => {
 function Scoring() {
   const [score, setScore] = useState();
   const [serve, setServe] = useState('home');
+  const [gamePoint, setGamePoint] = useState(0);
+  const [receive, setReceive] = useState("neutral");
+  const [currentSet, setCurrentSet] = useState();
   const [showDialog, setShowDialog] = useState({ show: false });
+
   let params = useParams();
   const matchId = params.matchId;
 
@@ -68,7 +76,23 @@ function Scoring() {
   };
 
   const handleFeedback = (feedback) => {
-    set(ref(db, `runningGames/${matchId}/${showDialog.team}/analyze/${showDialog.point}`), { time: new Date().getTime(), feedback: feedback });
+    if(feedback) {
+      console.log(gamePoint)
+      set(ref(db, `runningGames/${matchId}/analyze/${currentSet}/${gamePoint}`), 
+        { 
+          teamPoint: showDialog.point,
+          time: new Date().getTime(), 
+          feedback: feedback,
+          winner: showDialog.team,
+          serve: serve,
+          receive: receive,
+        });
+        setServer(showDialog.team, matchId);
+        setReceive("neutral");
+    }
+    else {
+      set(ref(db, `runningGames/${matchId}/${showDialog.team}/${currentSet}/score`), increment(-1));
+    }
     setShowDialog({ show: false });
   }
 
@@ -80,8 +104,13 @@ function Scoring() {
     const refDb = ref(db, `runningGames/${matchId}`);
     onValue(refDb, (snapshot) => {
       const data = snapshot.val();
-      if (data) {
+      if (data) {      
+        const set = data.away.set + data.home.set;
+        setCurrentSet(set)
         setScore(data);
+        const pAway = data.away[set] ? data.away[set].score : 0;
+        const pHome = data.home[set] ? data.home[set].score : 0;
+        setGamePoint(pAway + pHome)
         if (data.home.serve)
           setServe('home');
         else
@@ -90,6 +119,8 @@ function Scoring() {
     });
   }, [matchId]);
 
+  console.log(gamePoint)
+
   const closeGame = () => {
     score.endTime = new Date().getTime();
     set(ref(db, `history/${matchId}`), score);
@@ -97,24 +128,31 @@ function Scoring() {
   }
 
   const scoringHome = () => {
-    setShowDialog({ show: true, team: "home", point: score.home.score + 1 });
-    set(ref(db, `runningGames/${matchId}/home/score`), increment(1));
-    setServer('home', matchId);
+    setShowDialog({ show: true, team: "home", point: score.home[currentSet] ? score.home[currentSet].score + 1 : 1});
+    setGamePoint(gamePoint + 1);
+    set(ref(db, `runningGames/${matchId}/home/${currentSet}/score`), increment(1));    
   }
 
   const removeScoringHome = () => {
-    remove(ref(db, `runningGames/${matchId}/home/analyze/${score.home.score}`))
-    set(ref(db, `runningGames/${matchId}/home/score`), increment(-1));
+    if(score.home[currentSet] && score.home[currentSet].score > 0) {
+      remove(ref(db, `runningGames/${matchId}/home/analyze/${currentSet}/${score.home[currentSet].score}`))
+      set(ref(db, `runningGames/${matchId}/home/${currentSet}/score`), increment(-1));
+      setGamePoint(gamePoint - 1);
+    }
   }
 
   const scoringAway = () => {
-    setShowDialog({ show: true, team: "away", point: score.away.score + 1 });
-    set(ref(db, `runningGames/${matchId}/away/score`), increment(1));
-    setServer('away', matchId);
+    setShowDialog({ show: true, team: "away", point: score.away[currentSet] ? score.away[currentSet].score + 1 : 1 });
+    setGamePoint(gamePoint + 1);
+    set(ref(db, `runningGames/${matchId}/away/${currentSet}/score`), increment(1));
   }
 
   const removeScoringAway = () => {
-    set(ref(db, `runningGames/${matchId}/away/score`), increment(-1));
+    if(score.away[currentSet] && score.away[currentSet].score > 0) {
+      remove(ref(db, `runningGames/${matchId}/away/analyze/${currentSet}/${score.away[currentSet].score}`))
+      set(ref(db, `runningGames/${matchId}/away/${currentSet}/score`), increment(-1));
+      setGamePoint(gamePoint - 1);
+    }
   }
 
   if (!score)
@@ -129,16 +167,41 @@ function Scoring() {
         <Grid item xs={6} sx={{ textAlign: "center", background: "#303f9f", fontSize: '30px', color: '#fff' }}>{score.home.name}</Grid>
         <Grid item xs={6} sx={{ textAlign: "center", background: "#d81b60", fontSize: '30px', color: '#fff' }}>{score.away.name}</Grid>
         <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#3f51b5", fontSize: '30px', fontWeight: '800' }}>
-          {score.home.score}
+          {score.home[currentSet] ? score.home[currentSet].score : 0}
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#ec407a", fontSize: '30px', fontWeight: '800' }}>
-          {score.away.score}
+          {score.away[currentSet] ? score.away[currentSet].score : 0}
+        </Grid>
+        <Grid item xs={12} sx={{ mt: 1 }}>
+          <ToggleButtonGroup
+            color="secondary"
+            value={serve}
+            exclusive
+            sx={{ minWidth: '100%' }}
+            onChange={handleChange}
+          >
+            <ToggleButton value="home" sx={{ minWidth: '50vw', color: serve === "home" ? "#fff !important" : "", background: serve === "home" ? "#3f51b5 !important" : "unset"}}>Serve {score.home.name}</ToggleButton>
+            <ToggleButton value="away" sx={{ minWidth: '50vw', color: serve === "away" ? "#fff !important" : "", background: serve === "away" ? "#ec407a !important" : "unset" }}>Serve  {score.away.name}</ToggleButton>
+          </ToggleButtonGroup>
+        </Grid>
+        <Grid item xs={12}>
+          <small>Mottag</small>
+          <ToggleButtonGroup
+            color="primary"
+            exclusive
+            onChange={(event, value) => setReceive(value)}
+            value={receive}
+          >
+            <ToggleButton sx={{ fontWeight: "800", minWidth: '33vw', background: receive === "bad" ? "#ef5350 !important" : "unset" }} value="bad">-</ToggleButton>
+            <ToggleButton sx={{ fontWeight: "800",  minWidth: '33vw', background: receive === "neutral" ? "#e6ee9c !important" : "unset"  }} value="neutral">0</ToggleButton>
+            <ToggleButton sx={{ fontWeight: "800",  minWidth: '33vw', background: receive === "good" ? "#80cbc4 !important" : "unset"  }} value="good">+</ToggleButton>
+          </ToggleButtonGroup>
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "center" }}>
           <Button
             variant='contained'
             color="home"
-            sx={{ minWidth: '95%', minHeight: '30vh', fontSize: '30px', mt: '4px' }}
+            sx={{ minWidth: '95%', minHeight: '200px', fontSize: '30px', mt: '2px' }}
             onClick={scoringHome}>
             +
           </Button>
@@ -155,7 +218,7 @@ function Scoring() {
           <Button
             variant='contained'
             color="away"
-            sx={{ minWidth: '95%', minHeight: '30vh', fontSize: '30px', mt: '4px' }}
+            sx={{ minWidth: '95%', minHeight: '200px', fontSize: '30px', mt: '2px' }}
             onClick={scoringAway}>
             +
           </Button>
@@ -168,25 +231,19 @@ function Scoring() {
             -
           </Button>
         </Grid>
-        <Grid item xs={12} sx={{ mt: 3 }}>
-          <ToggleButtonGroup
-            color="secondary"
-            value={serve}
-            exclusive
-            sx={{ minWidth: '100%' }}
-            onChange={handleChange}
-          >
-            <ToggleButton value="home" sx={{ minWidth: '50vw' }}>Serve {score.home.name}</ToggleButton>
-            <ToggleButton value="away" sx={{ minWidth: '50vw' }}>Serve  {score.away.name}</ToggleButton>
-          </ToggleButtonGroup>
-        </Grid>
-        <Grid item xs={12} p={2} sx={{ fontSize: '20px', fontWeight: '800', textAlign: "center" }}>
-          Set
-        </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#3f51b5", fontSize: '30px', fontWeight: '800' }}>
+        <Grid item xs={12} p={1} sx={{ fontSize: '20px', fontWeight: '800', textAlign: "center" }}>
+        <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+        >
+          <Typography>Set {currentSet + 1}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+        <Grid container>
+        <Grid item xs={6} sx={{ height: "35px", textAlign: "center", pt: '2px', pb: '2px', color: '#fff', background: "#3f51b5", fontSize: '20px', fontWeight: '800' }}>
           {score.home.set}
         </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#ec407a", fontSize: '30px', fontWeight: '800' }}>
+        <Grid item xs={6} sx={{ height: "35px", textAlign: "center", pt: '2px', pb: '2px', color: '#fff', background: "#ec407a", fontSize: '20px', fontWeight: '800' }}>
           {score.away.set}
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "center" }}>
@@ -221,6 +278,10 @@ function Scoring() {
             -
           </Button>
         </Grid>
+        </Grid>
+        </AccordionDetails>
+      </Accordion>              
+        </Grid>        
       </Grid>
       <BottomBar closeGame={closeGame}/>
     </ThemeProvider>

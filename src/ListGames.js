@@ -44,8 +44,7 @@ function ListGames({ user, path, setGame }) {
   }
 
   const gameInfo = (id) => {
-    if(path === "history")
-      setGame(id);
+    setGame(id, path);
   }
 
   const setStreaming = (id) => {
@@ -56,9 +55,9 @@ function ListGames({ user, path, setGame }) {
   }
 
   return (
-    <Container maxWidth={"xs"}>      
+    <Container maxWidth={"xs"}>
       {user &&
-        <Accordion sx={{mt: 2}}>
+        <Accordion sx={{ mt: 2 }}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
           >
@@ -74,12 +73,22 @@ function ListGames({ user, path, setGame }) {
           <Grid item xs={1} className={"scoreboard-inner"}>{runningGames[key].home.serve && <Box sx={{ fontSize: "25px" }}>🏐</Box>}</Grid>
           <Grid item xs={6} className={"scoreboard-inner"} sx={{ textAlign: "left" }}>{runningGames[key].home.name}</Grid>
           <Grid item xs={2} className={"scoreboard-inner"}>{runningGames[key].home.set}</Grid>
-          <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>{runningGames[key].home.score}</Box></Grid>
+          <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>
+            {runningGames[key].home[runningGames[key].home.set + runningGames[key].away.set] ?
+              runningGames[key].home[runningGames[key].home.set + runningGames[key].away.set].score :
+              0}
+          </Box></Grid>
 
           <Grid item xs={1} className={"scoreboard-inner"}>{runningGames[key].away.serve && <Box sx={{ fontSize: "25px" }}>🏐</Box>}</Grid>
           <Grid item xs={6} className={"scoreboard-inner"} sx={{ textAlign: "left" }}>{runningGames[key].away.name}</Grid>
           <Grid item xs={2} className={"scoreboard-inner"}>{runningGames[key].away.set}</Grid>
-          <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>{runningGames[key].away.score}</Box></Grid>
+          <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>
+            {runningGames[key].away[runningGames[key].home.set + runningGames[key].away.set] ?
+              runningGames[key].away[runningGames[key].home.set + runningGames[key].away.set].score :
+              0}
+
+          </Box>
+          </Grid>
           {user &&
             <>
               <Grid item xs={5}><Button variant={"contained"} sx={{ width: '100%' }} color={"error"}>Ta bort</Button></Grid>

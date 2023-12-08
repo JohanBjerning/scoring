@@ -50,17 +50,20 @@ function Scoreboard() {
   if(!score)
     return <LinearProgress />
 
+  const homeScore = score.home[score.home.set + score.away.set] ? score.home[score.home.set + score.away.set].score : 0;
+  const awayScore = score.away[score.home.set + score.away.set] ? score.away[score.home.set + score.away.set].score : 0;
+
   return (
     <Grid container className={"scoreboard"} sx={{width: "400px", m: 2, borderRadius: '10px'}}>
       <Grid item xs={1} className={"scoreboard-inner"}>{score.home.serve && <Box sx={{fontSize: "25px"}}>🏐</Box>}</Grid>
       <Grid item xs={6} className={"scoreboard-inner"} sx={{textAlign: "left"}}>{score.home.name}</Grid>
       <Grid item xs={2} className={"scoreboard-inner"}>{score.home.set}</Grid>
-      <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>{score.home.score}</Box></Grid>
+      <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>{homeScore}</Box></Grid>
 
       <Grid item xs={1} className={"scoreboard-inner"}>{score.away.serve && <Box sx={{fontSize: "25px"}}>🏐</Box>}</Grid>
       <Grid item xs={6} className={"scoreboard-inner"} sx={{textAlign: "left"}}>{score.away.name}</Grid>
       <Grid item xs={2} className={"scoreboard-inner"}>{score.away.set}</Grid>
-      <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>{score.away.score}</Box></Grid>
+      <Grid item xs={3} className={"scoreboard-inner"}><Box className={"scoreboard-score"}>{awayScore}</Box></Grid>
     </Grid>
   );
 }
