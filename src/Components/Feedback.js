@@ -1,35 +1,36 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import Box from '@mui/material/Box';
+import { Grid } from '@mui/material';
 
 const alternatives = [
-  "Kill",
-  "Ace",
-  "Block",
-  "Unforced",
-  "Serve miss",
-  "Oklart"
+  "Left attack",
+  "Center attack",
+  "Right attack",
+  "Drop left",
+  "Drop center",
+  "Drop right",
+  "Block left",
+  "Block center",
+  "Block right",
+  "Back spike",
+  "Serve ace",
+  "Net touch",
+  "Unforced error",  
+  "Rotation error",
+  "Unknown error"
 ]
 export default function Feedback({report}) {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        '& > *': {
-          m: 2,
-          width: '100%'
-        },        
-      }}
-    >
-      <ButtonGroup
-        orientation="vertical"
-        variant="text"
-      >
+      <Grid container spacing={2} textAlign={"center"}>
         {alternatives.map(alternative => (
-          <Button onClick={()=>report(alternative)} sx={{p: 4}} key={alternative}>{alternative}</Button>
+          <Grid item xs={4} key={alternative}>
+            <Button
+              sx={{width: '100%', fontSize: "20px"}} 
+              variant={"outlined"} 
+              onClick={()=>report(alternative)}
+              >{alternative}</Button>
+          </Grid>
         ))}
-      </ButtonGroup>
-    </Box>
+      </Grid>
   );
 }

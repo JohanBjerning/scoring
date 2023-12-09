@@ -1,11 +1,62 @@
-import { Box, LinearProgress, Toolbar } from '@mui/material';
+import { AppBar, Box, LinearProgress, Toolbar } from '@mui/material';
 import { onValue, ref } from 'firebase/database';
 import React, { useEffect, useState } from 'react'
 import { db } from './firebase';
-import AnalyzeTable from './Components/AnalyzeTable';
+import { useParams } from "react-router-dom";
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { useTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import AnalyzeOptions from './AnalyzeOptions';
 
-function Analyze({ path, game }) {
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#1976d2',
+    },
+  },
+});
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index) {
+  return {
+    id: `full-width-tab-${index}`,
+    'aria-controls': `full-width-tabpanel-${index}`,
+  };
+}
+
+function Analyze() {
   const [score, setScore] = useState();
+  const [value, setValue] = React.useState(0);
+  const theme = useTheme();
+  let params = useParams();
+  const game = params.matchId;
+  const path = params.path;
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);    
+  };
+
   useEffect(() => {
     const refDb = ref(db, `${path}/${game}`);
     onValue(refDb, (snapshot) => {
@@ -15,40 +66,42 @@ function Analyze({ path, game }) {
       }
     });
   }, [game, path]);
-
-  function arrangeData(data) {
-    const newData = [];
-    Object.keys(data).map(key => {
-      newData[key] = [];
-      data[key].map(point => {
-        if (!newData[key][point.winner])
-          newData[key][point.winner] = [];
-        if (!newData[key][point.winner][point.feedback])
-          newData[key][point.winner][point.feedback] = 0;
-        newData[key][point.winner][point.feedback] += 1;
-        return "";
-      })
-      return "";
-    })
-    return newData;
-  }
-
+  
   if (!score)
     return <LinearProgress />
 
-  const arragened = score.analyze ? arrangeData(score.analyze) : null;
+  const teams = ["home", "away"];
 
   return (
     <Box>
-      {!arragened ?
+    <ThemeProvider theme={darkTheme}>
+    <AppBar position="static">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          indicatorColor="secondary"
+          textColor="inherit"
+          variant="fullWidth"
+          aria-label="full width tabs example"
+        >
+          {teams.map((team, i) =>
+            <Tab key={i} label={score[team].name} {...a11yProps(0)} />
+          )}
+        </Tabs>
+      </AppBar>
+      </ThemeProvider>
+      {!score ?
         <div>No data</div>
         :
         <>
-          <AnalyzeTable name={score.home.name} team={"home"} data={arragened} />
-          <AnalyzeTable name={score.away.name} team={"away"} data={arragened} />
+          {teams.map((team, i) =>
+            <TabPanel key={i} value={value} index={i} dir={theme.direction}>
+              <AnalyzeOptions name={score[team].name} team={team} data={score.analyze} />
+            </TabPanel>
+          )}
           <Toolbar />
         </>
-      }
+      }      
     </Box>
   )
 }

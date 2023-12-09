@@ -1,5 +1,5 @@
-import { Grid, Button, LinearProgress, ToggleButtonGroup, ToggleButton, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Grid, Button, LinearProgress, ToggleButtonGroup, ToggleButton, Typography, IconButton, Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { increment, onValue, remove, set } from 'firebase/database';
 import { db, ref } from './firebase';
 import AddFeedback from './Components/AddFeedback';
@@ -15,6 +15,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FlipCameraAndroidIcon from '@mui/icons-material/FlipCameraAndroid';
 
 const homeBase = '#303f9f';
 const homeMain = alpha(homeBase, 0.7);
@@ -66,29 +67,33 @@ function Scoring() {
   const [receive, setReceive] = useState("neutral");
   const [currentSet, setCurrentSet] = useState();
   const [showDialog, setShowDialog] = useState({ show: false });
+  const [reverse, setReverse] = useState(false);
 
   let params = useParams();
   const matchId = params.matchId;
 
-  const handleChange = (event, winner) => {
+  const handleChange = (winner) => {
     setServe(winner);
     setServer(winner, matchId);
   };
 
+  const flipOrder = () => {
+    set(ref(db, `runningGames/${matchId}/reverse`), !reverse);
+  }
+
   const handleFeedback = (feedback) => {
-    if(feedback) {
-      console.log(gamePoint)
-      set(ref(db, `runningGames/${matchId}/analyze/${currentSet}/${gamePoint}`), 
-        { 
+    if (feedback) {
+      set(ref(db, `runningGames/${matchId}/analyze/${currentSet}/${gamePoint}`),
+        {
           teamPoint: showDialog.point,
-          time: new Date().getTime(), 
+          time: new Date().getTime(),
           feedback: feedback,
           winner: showDialog.team,
           serve: serve,
           receive: receive,
         });
-        setServer(showDialog.team, matchId);
-        setReceive("neutral");
+      setServer(showDialog.team, matchId);
+      setReceive("neutral");
     }
     else {
       set(ref(db, `runningGames/${matchId}/${showDialog.team}/${currentSet}/score`), increment(-1));
@@ -98,16 +103,18 @@ function Scoring() {
 
   const setSet = (team, value) => {
     set(ref(db, `runningGames/${matchId}/${team}/set`), increment(value));
+    flipOrder();
   }
 
   useEffect(() => {
     const refDb = ref(db, `runningGames/${matchId}`);
     onValue(refDb, (snapshot) => {
       const data = snapshot.val();
-      if (data) {      
+      if (data) {
         const set = data.away.set + data.home.set;
         setCurrentSet(set)
         setScore(data);
+        setReverse(data.reverse ? data.reverse : false)
         const pAway = data.away[set] ? data.away[set].score : 0;
         const pHome = data.home[set] ? data.home[set].score : 0;
         setGamePoint(pAway + pHome)
@@ -119,8 +126,6 @@ function Scoring() {
     });
   }, [matchId]);
 
-  console.log(gamePoint)
-
   const closeGame = () => {
     score.endTime = new Date().getTime();
     set(ref(db, `history/${matchId}`), score);
@@ -128,13 +133,13 @@ function Scoring() {
   }
 
   const scoringHome = () => {
-    setShowDialog({ show: true, team: "home", point: score.home[currentSet] ? score.home[currentSet].score + 1 : 1});
+    setShowDialog({ show: true, team: "home", point: score.home[currentSet] ? score.home[currentSet].score + 1 : 1 });
     setGamePoint(gamePoint + 1);
-    set(ref(db, `runningGames/${matchId}/home/${currentSet}/score`), increment(1));    
+    set(ref(db, `runningGames/${matchId}/home/${currentSet}/score`), increment(1));
   }
 
   const removeScoringHome = () => {
-    if(score.home[currentSet] && score.home[currentSet].score > 0) {
+    if (score.home[currentSet] && score.home[currentSet].score > 0) {
       remove(ref(db, `runningGames/${matchId}/home/analyze/${currentSet}/${score.home[currentSet].score}`))
       set(ref(db, `runningGames/${matchId}/home/${currentSet}/score`), increment(-1));
       setGamePoint(gamePoint - 1);
@@ -148,7 +153,7 @@ function Scoring() {
   }
 
   const removeScoringAway = () => {
-    if(score.away[currentSet] && score.away[currentSet].score > 0) {
+    if (score.away[currentSet] && score.away[currentSet].score > 0) {
       remove(ref(db, `runningGames/${matchId}/away/analyze/${currentSet}/${score.away[currentSet].score}`))
       set(ref(db, `runningGames/${matchId}/away/${currentSet}/score`), increment(-1));
       setGamePoint(gamePoint - 1);
@@ -158,34 +163,152 @@ function Scoring() {
   if (!score)
     return <LinearProgress />
 
+  const header = [
+    <Grid item xs={6} sx={{ textAlign: "center", background: "#303f9f", pt: '10px', color: '#fff' }}>
+      <Typography sx={{ fontSize: '14px' }}>Home</Typography>
+      <Typography sx={{ fontSize: '30px' }}>{score.home.name}</Typography>
+    </Grid>,
+    <Grid item xs={6} sx={{ textAlign: "center", background: "#d81b60", pt: '10px', color: '#fff' }}>
+      <Typography sx={{ fontSize: '14px' }}>Away</Typography>
+      <Typography sx={{ fontSize: '30px' }}>{score.away.name}</Typography>
+    </Grid>,
+  ]
+
+  const currentScore = [
+    <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#3f51b5", fontSize: '30px', fontWeight: '800' }}>
+      {score.home[currentSet] ? score.home[currentSet].score : 0}
+    </Grid>,
+    <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#ec407a", fontSize: '30px', fontWeight: '800' }}>
+      {score.away[currentSet] ? score.away[currentSet].score : 0}
+    </Grid>
+  ]
+
+  const currentServe = [
+    <Grid item xs={6} sx={{ mt: 1 }}>
+      <Button onClick={() => handleChange("home")} sx={{ minWidth: '50vw', color: serve === "home" ? "#fff !important" : "", background: serve === "home" ? "#3f51b5 !important" : "unset" }}>Serve {score.home.name}</Button>
+    </Grid>,
+    <Grid item xs={6} sx={{ mt: 1 }}>
+      <Button onClick={() => handleChange("away")} sx={{ minWidth: '50vw', color: serve === "away" ? "#fff !important" : "", background: serve === "away" ? "#ec407a !important" : "unset" }}>Serve  {score.away.name}</Button>
+    </Grid>
+  ]
+
+  const doScoring = [
+    <Grid item xs={6} sx={{ textAlign: "center" }}>
+      <Button
+        variant='contained'
+        color="home"
+        sx={{ minWidth: '95%', minHeight: '200px', fontSize: '30px', mt: '2px' }}
+        onClick={scoringHome}>
+        +
+      </Button>
+      <Button
+        variant='contained'
+        color='grey'
+        sx={{ minWidth: '95%', fontSize: '20px', mt: '5px' }}
+        onClick={removeScoringHome}
+      >
+        -
+      </Button>
+    </Grid>,
+    <Grid item xs={6} sx={{ textAlign: "center" }}>
+      <Button
+        variant='contained'
+        color="away"
+        sx={{ minWidth: '95%', minHeight: '200px', fontSize: '30px', mt: '2px' }}
+        onClick={scoringAway}>
+        +
+      </Button>
+      <Button
+        variant='contained'
+        color='grey'
+        sx={{ minWidth: '95%', fontSize: '20px', mt: '5px' }}
+        onClick={removeScoringAway}
+      >
+        -
+      </Button>
+    </Grid>
+  ];
+
+  const doSetHeader = [
+    <Grid item xs={6} sx={{ height: "35px", textAlign: "center", pt: '2px', pb: '2px', color: '#fff', background: "#3f51b5", fontSize: '20px', fontWeight: '800' }}>
+      {score.home.set}
+    </Grid>,
+    <Grid item xs={6} sx={{ height: "35px", textAlign: "center", pt: '2px', pb: '2px', color: '#fff', background: "#ec407a", fontSize: '20px', fontWeight: '800' }}>
+      {score.away.set}
+    </Grid>
+  ];
+  const doSet = [
+    <Grid item xs={6} sx={{ textAlign: "center" }}>
+      <Button
+        variant='contained'
+        color="home"
+        sx={{ minWidth: '95%', fontSize: '30px', mt: '4px' }}
+        onClick={() => setSet("home", 1)}>
+        +
+      </Button>
+      <Button
+        variant='contained'
+        color='grey'
+        sx={{ minWidth: '95%', fontSize: '30px', mt: '5px' }}
+        onClick={() => setSet("home", -1)}>
+        -
+      </Button>
+    </Grid>,
+    <Grid item xs={6} sx={{ textAlign: "center" }}>
+      <Button
+        variant='contained'
+        color="away"
+        sx={{ minWidth: '95%', fontSize: '30px', mt: '4px' }}
+        onClick={() => setSet("away", 1)}>
+        +
+      </Button>
+      <Button
+        variant='contained'
+        color='grey'
+        sx={{ minWidth: '95%', fontSize: '30px', mt: '5px' }}
+        onClick={() => setSet("away", -1)}>
+        -
+      </Button>
+    </Grid>
+  ];
+
+  if(reverse) {
+    header.reverse();
+    currentScore.reverse();
+    currentServe.reverse();
+    doScoring.reverse();
+    doSetHeader.reverse();
+    doSet.reverse();
+  }
+
+
   return (
     <ThemeProvider theme={theme}>
       <Grid container className={'scoring'} sx={{ background: '#e8eaf6' }}>
         <AddFeedback open={showDialog.show} handleClose={handleFeedback} />
-        <Grid item xs={6} sx={{ textAlign: "center", background: "#303f9f", pt: '10px', fontSize: '14px', color: '#fff' }}>Home</Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", background: "#d81b60", pt: '10px', fontSize: '14px', color: '#fff' }}>Away</Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", background: "#303f9f", fontSize: '30px', color: '#fff' }}>{score.home.name}</Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", background: "#d81b60", fontSize: '30px', color: '#fff' }}>{score.away.name}</Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#3f51b5", fontSize: '30px', fontWeight: '800' }}>
-          {score.home[currentSet] ? score.home[currentSet].score : 0}
-        </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center", pt: '10px', pb: '10px', color: '#fff', background: "#ec407a", fontSize: '30px', fontWeight: '800' }}>
-          {score.away[currentSet] ? score.away[currentSet].score : 0}
-        </Grid>
-        <Grid item xs={12} sx={{ mt: 1 }}>
-          <ToggleButtonGroup
-            color="secondary"
-            value={serve}
-            exclusive
-            sx={{ minWidth: '100%' }}
-            onChange={handleChange}
-          >
-            <ToggleButton value="home" sx={{ minWidth: '50vw', color: serve === "home" ? "#fff !important" : "", background: serve === "home" ? "#3f51b5 !important" : "unset"}}>Serve {score.home.name}</ToggleButton>
-            <ToggleButton value="away" sx={{ minWidth: '50vw', color: serve === "away" ? "#fff !important" : "", background: serve === "away" ? "#ec407a !important" : "unset" }}>Serve  {score.away.name}</ToggleButton>
-          </ToggleButtonGroup>
-        </Grid>
+        <Box className={"flip-button"}>
+        <IconButton className={"flip-icon"} onClick={flipOrder}>
+          <FlipCameraAndroidIcon />
+        </IconButton>
+        </Box>
+        {header.map((team, i) => (
+          <React.Fragment key={i}>
+            {team}
+          </React.Fragment>
+        ))}
+        {currentScore.map((teamScore, i) => (
+          <React.Fragment key={i}>
+            {teamScore}
+          </React.Fragment>
+        ))}
+        {currentServe.map((teamServe, i) => (
+          <React.Fragment key={i}>
+            {teamServe}
+          </React.Fragment>
+        ))}
+
         <Grid item xs={12}>
-          <small>Mottag</small>
+          <small>Receiving</small>
           <ToggleButtonGroup
             color="primary"
             exclusive
@@ -193,97 +316,42 @@ function Scoring() {
             value={receive}
           >
             <ToggleButton sx={{ fontWeight: "800", minWidth: '33vw', background: receive === "bad" ? "#ef5350 !important" : "unset" }} value="bad">-</ToggleButton>
-            <ToggleButton sx={{ fontWeight: "800",  minWidth: '33vw', background: receive === "neutral" ? "#e6ee9c !important" : "unset"  }} value="neutral">0</ToggleButton>
-            <ToggleButton sx={{ fontWeight: "800",  minWidth: '33vw', background: receive === "good" ? "#80cbc4 !important" : "unset"  }} value="good">+</ToggleButton>
+            <ToggleButton sx={{ fontWeight: "800", minWidth: '33vw', background: receive === "neutral" ? "#e6ee9c !important" : "unset" }} value="neutral">0</ToggleButton>
+            <ToggleButton sx={{ fontWeight: "800", minWidth: '33vw', background: receive === "good" ? "#80cbc4 !important" : "unset" }} value="good">+</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center" }}>
-          <Button
-            variant='contained'
-            color="home"
-            sx={{ minWidth: '95%', minHeight: '200px', fontSize: '30px', mt: '2px' }}
-            onClick={scoringHome}>
-            +
-          </Button>
-          <Button
-            variant='contained'
-            color='grey'
-            sx={{ minWidth: '95%', fontSize: '20px', mt: '5px' }}
-            onClick={removeScoringHome}
-          >
-            -
-          </Button>
-        </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center" }}>
-          <Button
-            variant='contained'
-            color="away"
-            sx={{ minWidth: '95%', minHeight: '200px', fontSize: '30px', mt: '2px' }}
-            onClick={scoringAway}>
-            +
-          </Button>
-          <Button
-            variant='contained'
-            color='grey'
-            sx={{ minWidth: '95%', fontSize: '20px', mt: '5px' }}
-            onClick={removeScoringAway}
-          >
-            -
-          </Button>
-        </Grid>
+
+        {doScoring.map((doScore, i) => (
+          <React.Fragment key={i}>
+            {doScore}
+          </React.Fragment>
+        ))}
+
         <Grid item xs={12} p={1} sx={{ fontSize: '20px', fontWeight: '800', textAlign: "center" }}>
-        <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
-          <Typography>Set {currentSet + 1}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-        <Grid container>
-        <Grid item xs={6} sx={{ height: "35px", textAlign: "center", pt: '2px', pb: '2px', color: '#fff', background: "#3f51b5", fontSize: '20px', fontWeight: '800' }}>
-          {score.home.set}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+            >
+              <Typography>Set {currentSet + 1}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container>
+                {doSetHeader.map((doSH, i) => (
+                  <React.Fragment key={i}>
+                    {doSH}
+                  </React.Fragment>
+                ))}
+                {doSet.map((doS, i) => (
+                  <React.Fragment key={i}>
+                    {doS}
+                  </React.Fragment>
+                ))}
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         </Grid>
-        <Grid item xs={6} sx={{ height: "35px", textAlign: "center", pt: '2px', pb: '2px', color: '#fff', background: "#ec407a", fontSize: '20px', fontWeight: '800' }}>
-          {score.away.set}
-        </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center" }}>
-          <Button
-            variant='contained'
-            color="home"
-            sx={{ minWidth: '95%', fontSize: '30px', mt: '4px' }}
-            onClick={() => setSet("home", 1)}>
-            +
-          </Button>
-          <Button
-            variant='contained'
-            color='grey'
-            sx={{ minWidth: '95%', fontSize: '30px', mt: '5px' }}
-            onClick={() => setSet("home", -1)}>
-            -
-          </Button>
-        </Grid>
-        <Grid item xs={6} sx={{ textAlign: "center" }}>
-          <Button
-            variant='contained'
-            color="away"
-            sx={{ minWidth: '95%', fontSize: '30px', mt: '4px' }}
-            onClick={() => setSet("away", 1)}>
-            +
-          </Button>
-          <Button
-            variant='contained'
-            color='grey'
-            sx={{ minWidth: '95%', fontSize: '30px', mt: '5px' }}
-            onClick={() => setSet("away", -1)}>
-            -
-          </Button>
-        </Grid>
-        </Grid>
-        </AccordionDetails>
-      </Accordion>              
-        </Grid>        
       </Grid>
-      <BottomBar closeGame={closeGame}/>
+      <BottomBar closeGame={closeGame} />
     </ThemeProvider>
   )
 }

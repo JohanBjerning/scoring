@@ -8,10 +8,11 @@ export default function AddFeedback({open, handleClose}) {
   return (
     <div>
       <Dialog 
+        fullScreen
         onClose={() => handleClose(null)} 
         open={open}>
         <DialogTitle>Hur vanns bollen?</DialogTitle>
-        <Feedback report={handleClose} />
+          <Feedback report={handleClose} />
       </Dialog>
     </div>
   );

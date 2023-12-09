@@ -35,3 +35,13 @@
 .scoring {
   height: calc(100vh - 56px);
 }
+
+.flip-button {
+  position: fixed;
+  left: calc(50vw - 20px);
+  color: #fff;
+}
+
+.flip-icon {
+  color: #fff !important;
+}

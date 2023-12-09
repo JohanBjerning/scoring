@@ -13,40 +13,91 @@ const alternatives = [
   "Block",
   "Unforced",
   "Serve miss",
-  "Oklart"
+  "Oklart",
+  "Left attack",
+  "Center attack",
+  "Right attack",
+  "Drop left",
+  "Drop center",
+  "Drop right",
+  "Block left",
+  "Block center",
+  "Block right",
+  "Back spike",
+  "Serve ace",
+  "Net touch",
+  "Unforced error",  
+  "Rotation error",
+  "Unknown error"
 ]
 
-function AnalyzeTable({name, data, team}) {
-  const sets = Object.keys(data).length; 
+function arrangeData(data) {
+  const newData = [];
+  Object.keys(data).map(key => {
+    newData[key] = [];
+    data[key].map(point => {
+      if (!newData[key][point.winner])
+        newData[key][point.winner] = [];
+      if (!newData[key][point.winner][point.feedback])
+        newData[key][point.winner][point.feedback] = 0;
+      newData[key][point.winner][point.feedback] += 1;
+      return "";
+    })
+    return "";
+  })
+  return newData;
+}
+
+
+function AnalyzeTable({ name, data, winteam, loseteam }) {
+
+  const arragened = data ? arrangeData(data) : null;
+
+  if (!arragened)
+    return <></>
+
+  const sets = Object.keys(data).length;
+
   return (
     <Box m={2}>
-      <Typography variant='h6' sx={{color: "#fff", mt: 2}}>{name}</Typography>
-        <TableContainer component={Paper}>
+      <Typography variant='h6' sx={{ color: "#fff", mt: 2 }}>{name}</Typography>
+      <TableContainer component={Paper}>
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell sx={{fontWeight: '800'}}>Vinst genom</TableCell>
+              <TableCell sx={{ fontWeight: '800' }}></TableCell>
               {[...Array(sets)].map((x, i) => (
-                <TableCell key={i} sx={{fontWeight: '800'}} align="right">{i + 1}</TableCell>
+                <TableCell key={i} sx={{ fontWeight: '800' }} align="right">{i + 1}</TableCell>
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>           
-              <>
-                {alternatives.map(alt => (
+          <TableBody>
+            <>
+              {alternatives.map(alt => (
+                <React.Fragment key={alt}>
                   <TableRow
-                    key={alt}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >                  
+                    sx={{ 'td, th': { border: 0 } }}
+                  >
                     <TableCell component="th" scope="row">
-                      {alt}
+                      Win {alt}
                     </TableCell>
                     {[...Array(sets)].map((x, i) => (
-                      <TableCell key={i} align="right">{data[i][team] && data[i][team][alt]}</TableCell>
+                      <TableCell key={i} align="right">{arragened[i] && arragened[i][winteam] && arragened[i][winteam][alt]}</TableCell>
                     ))}
-                  </TableRow>                
-                ))}
-              </>            
+                  </TableRow>
+                  <TableRow
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      Lose {alt}
+                    </TableCell>
+                    {[...Array(sets)].map((x, i) => (
+                      <TableCell key={i} align="right">{arragened[i] && arragened[i][loseteam] && arragened[i][loseteam][alt]}</TableCell>
+                    ))}
+                  </TableRow>
+                </React.Fragment>
+              ))}
+            </>
           </TableBody>
         </Table>
       </TableContainer>
