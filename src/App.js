@@ -11,6 +11,7 @@ import Games from './Games'
 import Analyze from './Analyze'
 import BottomBarMain from './Components/BottomBarMain'
 import CreateGame from './CreateGame'
+import VolleyballCourt from './Components/VolleyballCourt'
 
 function App() {
   const [user, setUser] = useState(null);
@@ -45,7 +46,8 @@ function App() {
           }
           <Route path="/games">
             <Route path=":path" element={<Games user={user} />} />
-          </Route>
+          </Route>          
+          <Route exact path="court" element={<VolleyballCourt />} />
           <Route exact path="*" element={<Games user={user} />} />
           <Route exact path="/scoreboard" element={<Scoreboard />} />
           <Route exact path="/reset" element={<Reset />} />

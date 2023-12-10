@@ -7,30 +7,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Box, Paper, Typography } from '@mui/material';
 
-const alternatives = [
-  "Kill",
-  "Ace",
-  "Block",
-  "Unforced",
-  "Serve miss",
-  "Oklart",
-  "Left attack",
-  "Center attack",
-  "Right attack",
-  "Drop left",
-  "Drop center",
-  "Drop right",
-  "Block left",
-  "Block center",
-  "Block right",
-  "Back spike",
-  "Serve ace",
-  "Net touch",
-  "Unforced error",  
-  "Rotation error",
-  "Unknown error"
-]
-
 function arrangeData(data) {
   const newData = [];
   Object.keys(data).map(key => {
@@ -48,6 +24,22 @@ function arrangeData(data) {
   return newData;
 }
 
+function filterAlternatives (data) {
+  const alts = [];
+  data.map(setData => {
+    Object.keys(setData).map(key => {
+      Object.keys(setData[key]).map(altKey => {
+        if(!alts.includes(altKey))
+          alts.push(altKey);
+        return "";
+      })
+      return "";
+    })
+    return "";
+  })
+  return alts;
+}
+
 
 function AnalyzeTable({ name, data, winteam, loseteam }) {
 
@@ -58,16 +50,18 @@ function AnalyzeTable({ name, data, winteam, loseteam }) {
 
   const sets = Object.keys(data).length;
 
+  const alternatives = filterAlternatives(arragened)
+
   return (
     <Box m={2}>
       <Typography variant='h6' sx={{ color: "#fff", mt: 2 }}>{name}</Typography>
       <TableContainer component={Paper}>
         <Table aria-label="simple table">
           <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: '800' }}></TableCell>
+            <TableRow sx={{color: "#fff", background: "#3C3C3C"}}>
+              <TableCell sx={{ fontWeight: '800', color: "#fff" }}></TableCell>
               {[...Array(sets)].map((x, i) => (
-                <TableCell key={i} sx={{ fontWeight: '800' }} align="right">{i + 1}</TableCell>
+                <TableCell key={i} sx={{ fontWeight: '800', color: "#fff" }} align="right">{i + 1}</TableCell>
               ))}
             </TableRow>
           </TableHead>
@@ -76,7 +70,7 @@ function AnalyzeTable({ name, data, winteam, loseteam }) {
               {alternatives.map(alt => (
                 <React.Fragment key={alt}>
                   <TableRow
-                    sx={{ 'td, th': { border: 0 } }}
+                    sx={{ 'td, th': { border: 0 }, background: "#81c78488" }}
                   >
                     <TableCell component="th" scope="row">
                       Win {alt}
@@ -86,7 +80,7 @@ function AnalyzeTable({ name, data, winteam, loseteam }) {
                     ))}
                   </TableRow>
                   <TableRow
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    sx={{ 'td, th': { borderBottom: 1 }, '&:last-child td, &:last-child th': { border: 0 }, background: "#ff6e4088" }}
                   >
                     <TableCell component="th" scope="row">
                       Lose {alt}

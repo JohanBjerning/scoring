@@ -8,6 +8,7 @@ import live from './live.png'
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteGame from './Components/DeleteGame';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ResultTable from './Components/ResultTable';
 
 function formatDate(date) {
   var d = new Date(date),
@@ -104,29 +105,41 @@ function ListGames({ user, path, setGame }) {
   sortedGames.reverse();
 
   return (
-    <Container maxWidth={"xs"}>
+    <Container maxWidth={"md"} sx={{background: path === "history" ? "#fff" : "unset"}}>
       <DeleteGame show={showDelete} handleClose={handleCloseDelete} game={gameToDelete} path={path} />
-      {Object.keys(sortedGames).map(key => (        
-        <Box key={key}>
-          <Box sx={{ background: "#ffffffaa", mt: 1, p: 1, fontSize: "18px", fontWeight: 800, textAlign: "center", borderBottomRightRadius: '5px', borderBottomLeftRadius: '5px' }}>{key}
+      {Object.keys(sortedGames).reverse().map(key => (        
+        <Box key={key}>           
+            <Box sx={{width: '100%', borderBottom: "1px solid #000"}}>{key}</Box>
             {sortedGames[key].map(game =>
+            <React.Fragment key={game.key}>
+              {path === "history" ? 
+                <ResultTable 
+                  score={game} 
+                  showInfo={user ? () => gameInfo(game.key) : null} 
+                  handleDelete={user ? () => handleDelete(game.key) : null}/>
+              :
+              <Box 
+              sx={{ background: key === "Ongoing" ? "#81c784aa" : "#ffffffaa", mt: 1, p: 1, fontSize: "18px", fontWeight: 800, textAlign: "center", borderBottomRightRadius: '5px', borderBottomLeftRadius: '5px' }}>
               <Grid key={game.key} container className={"scoreboard"} sx={{ mt: 2, borderRadius: '10px' }}>
-                <Grid item xs={12} sx={{ fontSize: "12px", textAlign: "right", mr: "8px" }}>
-                  <Button
-                    variant={"standard"}
-                    endIcon={<InfoIcon />}
-                    onClick={() => gameInfo(game.key)}
-                    sx={{ color: "#fff", borderRadius: "10px !important", p: "2px !important", m: 1 }}>
-                    Stats
-                  </Button>
-                  {user && <Button
-                    variant={"standard"}
-                    endIcon={<DeleteIcon />}
-                    onClick={() => handleDelete(game.key)}
-                    sx={{ color: "#fff", borderRadius: "10px !important", p: "2px !important", m: 1 }}>
-                    Delete
-                  </Button>}
-                </Grid>
+                {user &&
+                  <Grid item xs={6} sx={{ fontSize: "12px", textAlign: "left", borderBottom: "1px solid #fff" }}>
+                    <Button
+                      variant={"standard"}
+                      endIcon={<InfoIcon />}
+                      onClick={() => gameInfo(game.key)}
+                      sx={{ color: "#fff", borderRadius: "10px !important", p: "2px !important", m: 1 }}>
+                      Stats
+                    </Button>
+                  </Grid>}
+                {user &&
+                  <Grid item xs={6} sx={{ fontSize: "12px", textAlign: "right", borderBottom: "1px solid #fff" }}>
+                    <Button
+                      variant={"standard"}
+                      endIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(game.key)}
+                      sx={{ color: "#fff", borderRadius: "10px !important", p: "2px !important", m: 1 }}>
+                      Delete
+                    </Button></Grid>}
                 <Grid item xs={1} className={"scoreboard-inner"}>{game.home.serve && <Box sx={{ fontSize: "25px" }}>🏐</Box>}</Grid>
                 <Grid item xs={6} className={"scoreboard-inner"} sx={{ textAlign: "left" }}>{game.home.name}</Grid>
                 <Grid item xs={2} className={"scoreboard-inner"}>{game.home.set}</Grid>
@@ -156,8 +169,10 @@ function ListGames({ user, path, setGame }) {
                   </>
                 }
               </Grid>
+              </Box>
+              }
+              </React.Fragment>
             )}
-          </Box>
         </Box>
       ))}
       <Toolbar />

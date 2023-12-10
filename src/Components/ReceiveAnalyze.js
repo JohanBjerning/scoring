@@ -49,10 +49,10 @@ function ReceiveAnalyze({name, data, team, winteam, loseteam}) {
         <TableContainer component={Paper}>
         <Table aria-label="simple table">
           <TableHead>
-            <TableRow>
-              <TableCell sx={{fontWeight: '800'}}>Point</TableCell>
-              <TableCell sx={{fontWeight: '800'}}>Receive</TableCell>
-              <TableCell sx={{fontWeight: '800'}}>Winning?</TableCell>
+            <TableRow sx={{color: "#fff", background: "#3C3C3C"}}>
+              <TableCell sx={{fontWeight: '800', color: "#fff"}}>Point</TableCell>
+              <TableCell sx={{fontWeight: '800', color: "#fff"}}>Receive</TableCell>
+              <TableCell sx={{fontWeight: '800', color: "#fff"}}>Winning?</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>           

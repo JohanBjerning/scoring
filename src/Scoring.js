@@ -10,7 +10,6 @@ import {
   alpha,
   getContrastRatio,
 } from '@mui/material/styles';
-import BottomBar from './Components/BottomBar';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -102,7 +101,11 @@ function Scoring() {
   }
 
   const setSet = (team, value) => {
-    set(ref(db, `runningGames/${matchId}/${team}/set`), increment(value));
+    if(value > 0)
+      set(ref(db, `runningGames/${matchId}/${team}/${score[team].set}/winner`), true);
+    else
+      remove(ref(db, `runningGames/${matchId}/${team}/${score[team].set}/winner`)); 
+    set(ref(db, `runningGames/${matchId}/${team}/set`), increment(value));    
     flipOrder();
   }
 
@@ -125,12 +128,6 @@ function Scoring() {
       }
     });
   }, [matchId]);
-
-  const closeGame = () => {
-    score.endTime = new Date().getTime();
-    set(ref(db, `history/${matchId}`), score);
-    remove(ref(db, `runningGames/${matchId}`));
-  }
 
   const scoringHome = () => {
     setShowDialog({ show: true, team: "home", point: score.home[currentSet] ? score.home[currentSet].score + 1 : 1 });
@@ -351,7 +348,6 @@ function Scoring() {
           </Accordion>
         </Grid>
       </Grid>
-      <BottomBar closeGame={closeGame} />
     </ThemeProvider>
   )
 }

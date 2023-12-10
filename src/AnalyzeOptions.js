@@ -5,6 +5,8 @@ import { styled } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import { useTheme } from '@mui/material/styles';
 import ReceiveAnalyze from './Components/ReceiveAnalyze';
+import ResultTable from './Components/ResultTable';
+import VolleyballCourt from './Components/VolleyballCourt';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -67,10 +69,11 @@ function a11yProps(index) {
   };
 }
 
-function AnalyzeOptions({name, team, data}) {
+function AnalyzeOptions({name, team, score}) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
 
+  const data = score.analyze;
   const handleChange = (event, newValue) => {
     setValue(newValue);    
   };
@@ -89,6 +92,7 @@ function AnalyzeOptions({name, team, data}) {
         >
           <StyledTab key={0} label={"Overview"} {...a11yProps(0)} />
           <StyledTab key={1} label={"Receive"} {...a11yProps(0)} />
+          <StyledTab key={2} label={"Court"} {...a11yProps(0)} />
         </StyledTabs>
         </Box>
       </AppBar>
@@ -97,10 +101,14 @@ function AnalyzeOptions({name, team, data}) {
         :
         <>
         <TabPanel value={value} index={0} dir={theme.direction}>
+          <ResultTable score={score} />
           <AnalyzeTable name={name} winteam={team} loseteam={team === "home" ? "away" : "home"} data={data} />
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
           <ReceiveAnalyze name={name} data={data} team={team} />
+        </TabPanel>
+        <TabPanel value={value} index={2} dir={theme.direction}>
+          <VolleyballCourt score={score} team={team} />
         </TabPanel>
         <Toolbar />
         </>

@@ -1,4 +1,4 @@
-import { AppBar, Box, LinearProgress, Toolbar } from '@mui/material';
+import { AppBar, Box, Container, LinearProgress, Toolbar } from '@mui/material';
 import { onValue, ref } from 'firebase/database';
 import React, { useEffect, useState } from 'react'
 import { db } from './firebase';
@@ -93,14 +93,14 @@ function Analyze() {
       {!score ?
         <div>No data</div>
         :
-        <>
-          {teams.map((team, i) =>
+        <Container maxWidth={"md"} sx={{padding: "0 !important"}}>
+          {teams.map((team, i) =>          
             <TabPanel key={i} value={value} index={i} dir={theme.direction}>
-              <AnalyzeOptions name={score[team].name} team={team} data={score.analyze} />
+              <AnalyzeOptions name={score[team].name} team={team} score={score} />
             </TabPanel>
           )}
           <Toolbar />
-        </>
+        </Container>
       }      
     </Box>
   )
