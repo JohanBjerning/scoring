@@ -72,16 +72,34 @@ function VolleyballCourt({score, team}) {
           <ToggleButton value="defence" sx={{width: "50%"}}>Defence</ToggleButton>
         </ToggleButtonGroup>
       </Grid>
-      <Grid item xs={1} className={"court"} sx={{ textAlign: "center", height: "60px", background: "#5F9354" }}>
+
+      <Grid item xs={1} sx={{heigth: "20px", background: "#5F9354", borderBottom: "4px dashed white", paddingTop: "2px"}}>
 
       </Grid>
-      <Grid item xs={10} className={"court"} sx={{textAlign: "center", height: "60px", background: "#5F9354", borderBottom: "2px solid white", display: "flex"}}>
-        {/* Zone 0 */}
-        {zoneData[0] && zoneData[0][type] && <span className={"score-court"}>{zoneData[0][type]}</span>}
-      </Grid>      
-      <Grid item xs={1} className={"court"} sx={{textAlign: "center", height: "60px", background: "#5F9354"}}>
+      <Grid item xs={10} sx={{heigth: "20px", background: "#D0904A", borderBottom: "4px solid white", paddingTop: "2px"}}>
 
       </Grid>
+      <Grid item xs={1} sx={{heigth: "20px", background: "#5F9354", borderBottom: "4px dashed white", paddingTop: "2px"}}>
+
+      </Grid>
+      <Grid item xs={1} className={"court"} sx={{textAlign: "center", height: "200px", background: "#5F9354", borderRight: "2px solid white"}}>
+        
+        </Grid>
+        <Grid item xs={3} className={"court"} sx={{textAlign: "center", height: "200px", background: "#D0904A", borderBottom: "4px solid white"}}>
+          {/* Zone 4 */}
+          {zoneData[4] && zoneData[4][type] && <span className={"score-court"}>{zoneData[4][type]}</span>}
+        </Grid>
+        <Grid item xs={4} className={"court"} sx={{textAlign: "center", height: "200px", background: "#D0904A", borderBottom: "4px solid white"}}>
+          {/* Zone 3 */}
+          {zoneData[3] && zoneData[3][type] && <span className={"score-court"}>{zoneData[3][type]}</span>}
+        </Grid>
+        <Grid item xs={3} className={"court"} sx={{textAlign: "center", height: "200px", background: "#D0904A", borderBottom: "4px solid white"}}>
+          {/* Zone 2 */}
+          {zoneData[2] && zoneData[2][type] && <span className={"score-court"}>{zoneData[2][type]}</span>}
+        </Grid>
+        <Grid item xs={1} className={"court"} sx={{textAlign: "center", height: "200px", background: "#5F9354", borderLeft: "2px solid white"}}>
+  
+        </Grid>
 
       <Grid item xs={1} className={"court"} sx={{textAlign: "center", height: "300px", background: "#5F9354", borderRight: "2px solid white"}}>
         
@@ -102,24 +120,17 @@ function VolleyballCourt({score, team}) {
 
       </Grid>
 
-      <Grid item xs={1} className={"court"} sx={{textAlign: "center", height: "200px", background: "#5F9354", borderRight: "2px solid white", borderBottom: "4px solid white"}}>
-        
-      </Grid>
-      <Grid item xs={3} className={"court"} sx={{textAlign: "center", height: "200px", background: "#D0904A", borderBottom: "4px solid white"}}>
-        {/* Zone 4 */}
-        {zoneData[4] && zoneData[4][type] && <span className={"score-court"}>{zoneData[4][type]}</span>}
-      </Grid>
-      <Grid item xs={4} className={"court"} sx={{textAlign: "center", height: "200px", background: "#D0904A", borderBottom: "4px solid white"}}>
-        {/* Zone 3 */}
-        {zoneData[3] && zoneData[3][type] && <span className={"score-court"}>{zoneData[3][type]}</span>}
-      </Grid>
-      <Grid item xs={3} className={"court"} sx={{textAlign: "center", height: "200px", background: "#D0904A", borderBottom: "4px solid white"}}>
-        {/* Zone 2 */}
-        {zoneData[2] && zoneData[2][type] && <span className={"score-court"}>{zoneData[2][type]}</span>}
-      </Grid>
-      <Grid item xs={1} className={"court"} sx={{textAlign: "center", height: "200px", background: "#5F9354", borderLeft: "2px solid white", borderBottom: "4px solid white"}}>
+      <Grid item xs={1} className={"court"} sx={{ textAlign: "center", height: "70px", background: "#5F9354" }}>
 
       </Grid>
+      <Grid item xs={10} className={"court"} sx={{ textAlign: "center", height: "70px", background: "#5F9354", display: "flex" }}>
+        {/* Zone 0 */}
+        {zoneData[0] && zoneData[0][type] && <span className={"score-court"}>{zoneData[0][type]}</span>}
+      </Grid>
+      <Grid item xs={1} className={"court"} sx={{ textAlign: "center", height: "70px", background: "#5F9354" }}>
+
+      </Grid>
+
       <Grid item xs={12} sx={{paddingTop: "15px"}} component={Paper}>
         Choose Set:
         <TableContainer component={Paper}>

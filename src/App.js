@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Scoreboard from './Scoreboard'
 import Scoring from './Scoring'
 import Login from './Auth/Login'
@@ -24,9 +24,10 @@ function App() {
       setUser(null)
   });
 
+  console.log("h")
+
   return (
     <>
-      <Router>
         <Routes>
           {!user ?
             <>
@@ -41,19 +42,18 @@ function App() {
               <Route path="/analyze">
                 <Route path=":matchId/:path" element={<Analyze />} />
               </Route>
-              <Route path="/create"  element={<CreateGame />} />
+              <Route path="/create" element={<CreateGame />} />
             </>
           }
           <Route path="/games">
             <Route path=":path" element={<Games user={user} />} />
-          </Route>          
+          </Route>
           <Route exact path="court" element={<VolleyballCourt />} />
           <Route exact path="*" element={<Games user={user} />} />
           <Route exact path="/scoreboard" element={<Scoreboard />} />
           <Route exact path="/reset" element={<Reset />} />
         </Routes>
         <BottomBarMain user={user} />
-      </Router>
     </>
   )
 }

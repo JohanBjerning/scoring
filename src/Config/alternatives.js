@@ -1,10 +1,4 @@
 const alternatives = [
-  "Kill",
-  "Ace",
-  "Block",
-  "Unforced",
-  "Serve miss",
-  "Oklart",
   "Left attack",
   "Center attack",
   "Right attack",
@@ -47,6 +41,14 @@ const alternativesAdvanced = {
     zone: "2",
     type: "attack"
   }, 
+  "Back spike": {
+    zone: "6",
+    type: "attack"
+  },
+  "Serve ace": {
+    zone: "0",
+    type: "attack"
+  },  
   "Block left": {
     zone: "4",
     type: "defence"
@@ -59,15 +61,40 @@ const alternativesAdvanced = {
     zone: "2",
     type: "defence"
   },
-  "Back spike": {
-    zone: "6",
-    type: "attack"
+  "Right attack out": {
+    zone: "2",
+    type: "miss"
   },
-  "Serve ace": {
-    zone: "0",
-    type: "attack"
-  },  
-  "Net touch": {
+  "Center attack out": {
+    zone: "3",
+    type: "mishit"
+  },
+  "Left attack out": {
+    zone: "4",
+    type: "mishit"
+  },
+  "Right attack net": {
+    zone: "2",
+    type: "mishit"
+  },
+  "Center attack net": {
+    zone: "3",
+    type: "mishit"
+  },
+  "Left attack net": {
+    zone: "4",
+    type: "mishit"
+  },
+  "Net touch right": {
+    zone: "2",
+    type: "unforced"
+  },
+  "Net touch center": {
+    zone: "3",
+    type: "unforced"
+  },
+  "Net touch left": {
+    zone: "4",
     type: "unforced"
   },
   "Unforced error": {
